@@ -27,4 +27,14 @@ const login = async ( email, password) => {
     return { status: 500, message: 'Server error, please try again.' };
   }
 };
-export { createUserAPI,login };
+const getListUser = async () => {
+  const url_api = "/v1/api/user"; // full URL for local dev
+  try {
+    const response = await axios.get(url_api);
+    return response.data; // Return the data directly
+  } catch (error) {
+    console.error('Error fetching user list:', error);
+    return { status: 500, message: 'Server error, please try again.' };
+  }
+};
+export { createUserAPI,login,getListUser };

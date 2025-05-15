@@ -1,28 +1,44 @@
-
-import { Form, Input, Button } from 'antd';
-
+import { Form, Input, Button, message } from 'antd';
 import { login } from '../util/api';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import AuthContext from '../components/context/auth.context';
 
 const LoginPage = () => {
-    const navigate = useNavigate();
-  const onFinish = async (values) => {
-    const response =  await login(
-      values.email,
-      values.password       
-  )
-  console.log('Response:', response);
-    if (response) {
-      // Handle successful login (e.g., store token, redirect)
-      console.log('Login successful:', response);
-      navigate('/');  // Redirect to home page after successful login
+  const navigate = useNavigate();
+  const {setAuth} = useContext(AuthContext);
+const onFinish = async (values) => {
+  try {
+    const response = await login(values.email, values.password);
+    console.log("Response:", response);
+    console.log("Response data:", response.data);
+    if (response && response.access_token) {
+      // Handle successful login
+      console.log("Login successful:", response);
+      localStorage.setItem("accessToken", response.access_token); // Save token to local storage
+      message.success("Login successful!");
+      navigate("/"); // Redirect to home page
+
+      // Update AuthContext
+      setAuth({
+        isAuthenticated: true,
+        user: {
+          email: response?.data?.email || "",
+          name: response?.data?.name || "",
+          role: response?.data?.role || "",
+        },
+      });
     } else {
-      // Handle login failure (e.g., show error message)
-      console.error('Login failed:', response);
+      // Handle login failure
+      message.error("Login failed. Please check your credentials.");
+      console.error("Login failed:", response);
     }
-
+  } catch (error) {
+    // Handle unexpected errors
+    message.error("An error occurred. Please try again later.");
+    console.error("Error during login:", error);
+  }
 };
-
 
   return (
     <div style={{ maxWidth: '400px', margin: '0 auto', padding: '20px' }}>

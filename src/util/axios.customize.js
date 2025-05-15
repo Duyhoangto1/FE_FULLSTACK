@@ -4,18 +4,22 @@ import axios from "axios";
 const instance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
 });
-// instance.defaults.headers.common["Authorization"] = AUTH_TOKEN;
+
 
 // const instance = axios.create();
 
 // Add a request interceptor
-instance.interceptors.request.use(function (config) {
-    // Do something before request is sent
+instance.interceptors.request.use(
+  function (config) {
+    const AUTH_TOKEN = localStorage.getItem("accessToken");
+    console.log("AUTH_TOKEN:", AUTH_TOKEN); // Debugging
+    config.headers.Authorization = AUTH_TOKEN ? `Bearer ${AUTH_TOKEN}` : "";
     return config;
-  }, function (error) {
-    // Do something with request error
+  },
+  function (error) {
     return Promise.reject(error);
-  });
+  }
+);
 
 // Add a response interceptor
 instance.interceptors.response.use(function (response) {
@@ -30,6 +34,9 @@ instance.interceptors.response.use(function (response) {
   }, function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
+    if(error?.response?.data ) return error?.response?.data;
+    
+    
     return Promise.reject(error);
   });
 export default instance;
